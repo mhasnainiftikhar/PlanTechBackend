@@ -8,6 +8,6 @@
         "routes": [{
 
             "src": "/(.*)",
-            "dest": "/planttech/wsgi.py"
+            "dest": "/plantTech/wsgi.py"
         } ]
 }
