@@ -17,14 +17,58 @@ class UserViewSet(viewsets.ViewSet):
     
     
     def list(self, request):
-        users = [doc.to_dict() for doc in db.collection('users').stream()]
+        # users = [doc.to_dict() for doc in db.collection('users').stream()]
+        
+        # Retrieve email from query parameters
+        email = request.query_params.get('email')
+        
+        # Debugging: Log the received email
+        print(f"Received email: {email}")
+
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Query the users collection for the document with the specified email
+        users_ref = db.collection('users').where('email', '==', email)
+        users = users_ref.stream()
+
+        # Debugging: Log the number of users found
+        user_list = [user.to_dict() for user in users]
+        print(f"Users found: {user_list}")  # Log the entire user list found
+
+        if user_list:
+            # Debugging: Log the first user being returned
+            print(f"Returning user: {user_list[0]}")
+            return Response(user_list[0], status=status.HTTP_200_OK)
         return Response(users, status=status.HTTP_200_OK)
 
-    def retrieve(self, request, pk=None):
-        user_ref = db.collection('users').document(pk)
-        user = user_ref.get()
-        if user.exists:
-            return Response(user.to_dict(), status=status.HTTP_200_OK)
+    def retrieve(self, request):
+        print(f"Received email:")
+
+        # Retrieve email from query parameters
+        email = request.query_params.get('email')
+        
+        # Debugging: Log the received email
+        print(f"Received email: {email}")
+
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Query the users collection for the document with the specified email
+        users_ref = db.collection('users').where('email', '==', email)
+        users = users_ref.stream()
+
+        # Debugging: Log the number of users found
+        user_list = [user.to_dict() for user in users]
+        print(f"Users found: {user_list}")  # Log the entire user list found
+
+        if user_list:
+            # Debugging: Log the first user being returned
+            print(f"Returning user: {user_list[0]}")
+            return Response(user_list[0], status=status.HTTP_200_OK)
+
+        # Debugging: Log that no user was found
+        print("No user found with the provided email.")
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
     def create(self, request):
