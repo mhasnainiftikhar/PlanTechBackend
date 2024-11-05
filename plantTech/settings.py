@@ -118,16 +118,21 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 import os
+import json
 import firebase_admin
 from firebase_admin import credentials
-firebase_credentials_path = os.path.join(BASE_DIR, os.environ.get('FIREBASE_CREDENTIALS'))
-if not firebase_credentials_path:
-    raise ValueError("Firebase credentials file path not found. Please set the FIREBASE_CREDENTIALS environment variable.")
 
-cred = credentials.Certificate(firebase_credentials_path)
+# Retrieve Firebase credentials from environment variable
+firebase_credentials_json = os.getenv('FIREBASE_CREDENTIALS')
+if not firebase_credentials_json:
+    raise ValueError("Firebase credentials not found in environment variables. Please set FIREBASE_CREDENTIALS.")
+
+# Load the JSON string as a dictionary
+firebase_credentials_dict = json.loads(firebase_credentials_json)
+
+# Initialize Firebase app
+cred = credentials.Certificate(firebase_credentials_dict)
 firebase_admin.initialize_app(cred)
-
 
 AUTH_USER_MODEL = 'plants.User'
