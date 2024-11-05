@@ -1,10 +1,24 @@
-from django.urls import path
-from . import views
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import (
+    UserViewSet, UserPlantViewSet, PlantDiagnosisViewSet, PlantDiseaseViewSet,
+    GrowthTrackerViewSet, SoilAnalysisViewSet, PlantTypeViewSet,
+    GrowthStageViewSet, NotificationViewSet, WeatherDataViewSet
+)
+
+router = DefaultRouter()
+router.register(r'users', UserViewSet, basename='user')
+router.register(r'userplants', UserPlantViewSet, basename='userplant')
+router.register(r'plantdiagnoses', PlantDiagnosisViewSet, basename='plantdiagnoses')
+router.register(r'plantdiseases', PlantDiseaseViewSet, basename='plantdisease')
+router.register(r'growthtrackers', GrowthTrackerViewSet, basename='growthtrack')
+router.register(r'soilanalyses', SoilAnalysisViewSet, basename='soilanalysis' )
+router.register(r'planttypes', PlantTypeViewSet, basename='planttype' )
+router.register(r'growthstages', GrowthStageViewSet, basename='growthstage' )
+router.register(r'notifications', NotificationViewSet,'notification')
+router.register(r'weatherdata', WeatherDataViewSet,'weatherdata')
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('register/', views.register, name='register'),
-    path('login/', views.login_view, name='login'),
-    path('plants/', views.list_plants, name='list_plants'),  # Changed to list_plants
-    path('plants/create/', views.create_plant, name='create_plant'),  # Added new URL for create_plant
+    path('', include(router.urls)),
+    
 ]
