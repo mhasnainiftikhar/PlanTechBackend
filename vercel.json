@@ -1,0 +1,13 @@
+{
+    "builds":[{
+        "src": "plantTech/wsgi.py",
+        "use": "@vercel/python",
+        "config": {"maxlambdaSize": "30mb", "runtime":"python3.13.0" }
+        }],
+
+        "routes": [{
+
+            "src": "/(.*)",
+            "dest": "/planttech/wsgi.py"
+        } ]
+}
