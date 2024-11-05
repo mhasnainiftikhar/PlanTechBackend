@@ -10,6 +10,10 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/wsgi/
 import os
 
 from django.core.wsgi import get_wsgi_application
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # Load environment variables from .env file
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'plantTech.settings')
 
