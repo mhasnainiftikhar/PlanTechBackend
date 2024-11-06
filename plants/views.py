@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.contrib.auth.hashers import check_password
+from django.contrib.auth.hashers import check_password, make_password
 from .firebase import db  # Import the Firestore client
 from .serializers import (
     UserSerializer, UserPlantSerializer, PlantDiagnosisSerializer,
@@ -16,42 +16,44 @@ def index(request):
 # User viewset
 class UserViewSet(viewsets.ViewSet):
     
-    
     def list(self, request):
-        # users = [doc.to_dict() for doc in db.collection('users').stream()]
-        
-        # Retrieve email from query parameters
+        # Retrieve email and password from query parameters
         email = request.query_params.get('email')
         password = request.query_params.get('password')
 
-        
-        # Debugging: Log the received email
+        # Debugging: Log the received email and password
         print(f"Received email: {email}")
         print(f"Password: {password}")
-        
+
         if not email or not password:
             return Response({"error": "Email and password are required"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         # Query the users collection for the document with the specified email
         users_ref = db.collection('users').where('email', '==', email)
         users = users_ref.stream()
-        
-        
-        # Debugging: Log the number of users found
+
+        # Create a list of users that match the email query
         user_list = [user.to_dict() for user in users]
-        print(f"Users found: {user_list}")  # Log the entire user list found
+        print(f"Users found: {user_list}")
 
         if user_list:
             user_data = user_list[0]
-            # Debugging: Log the first user being returned
+            # Check if the password is correct and return user info if it matches
             if check_password(password, user_data['password']):
+                print(f"User info: ")
                 user_info = {
                     "email": user_data['email'],
                     "username": user_data['username']
-            }
-            print(f"Returning user: {user_info}")
-            return Response(user_info, status=status.HTTP_200_OK)
-        return Response(users, status=status.HTTP_200_OK)
+                }
+                print(f"Returning user: {user_info}")
+                return Response(user_info, status=status.HTTP_200_OK)
+            else:
+                # Return a response indicating invalid credentials if password doesn't match
+                return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Return a response indicating that no user was found with the provided email
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
 
     def retrieve(self, request):
         print(f"Received email:")
@@ -84,6 +86,8 @@ class UserViewSet(viewsets.ViewSet):
 
     def create(self, request):
         data = request.data
+        if 'password' in data:
+            data['password'] = make_password(data['password'])
         user_ref = db.collection('users').document()  # Create a new document
         user_ref.set(data)
         return Response({"id": user_ref.id, **data}, status=status.HTTP_201_CREATED)
