@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'your-default-secret-key')
 
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
-# ALLOWED_HOSTS = ['.vercel.app', 'https://plan-tech-frontend.vercel.app','http://localhost:8081','localhost', '127.0.0.1','0.0.0.0']
+ALLOWED_HOSTS = ['.vercel.app', 'https://plan-tech-frontend.vercel.app','http://localhost:8081','localhost', '127.0.0.1','0.0.0.0']
 CORS_ALLOW_ALL_ORIGINS = True
 
 # Static files (CSS, JavaScript, Images)
