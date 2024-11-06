@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.contrib.auth.hashers import check_password
 from .firebase import db  # Import the Firestore client
 from .serializers import (
     UserSerializer, UserPlantSerializer, PlantDiagnosisSerializer,
@@ -21,25 +22,35 @@ class UserViewSet(viewsets.ViewSet):
         
         # Retrieve email from query parameters
         email = request.query_params.get('email')
+        password = request.query_params.get('password')
+
         
         # Debugging: Log the received email
         print(f"Received email: {email}")
-
-        if not email:
-            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
-
+        print(f"Password: {password}")
+        
+        if not email or not password:
+            return Response({"error": "Email and password are required"}, status=status.HTTP_400_BAD_REQUEST)
+        
         # Query the users collection for the document with the specified email
         users_ref = db.collection('users').where('email', '==', email)
         users = users_ref.stream()
-
+        
+        
         # Debugging: Log the number of users found
         user_list = [user.to_dict() for user in users]
         print(f"Users found: {user_list}")  # Log the entire user list found
 
         if user_list:
+            user_data = user_list[0]
             # Debugging: Log the first user being returned
-            print(f"Returning user: {user_list[0]}")
-            return Response(user_list[0], status=status.HTTP_200_OK)
+            if check_password(password, user_data['password']):
+                user_info = {
+                    "email": user_data['email'],
+                    "username": user_data['username']
+            }
+            print(f"Returning user: {user_info}")
+            return Response(user_info, status=status.HTTP_200_OK)
         return Response(users, status=status.HTTP_200_OK)
 
     def retrieve(self, request):
